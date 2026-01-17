@@ -2,11 +2,12 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import "./App.css";
 import Modal from "./components/Modal";
 import ProductCard from "./components/ProductCard";
-import { formInputsList, productList } from "./data";
+import { colors, formInputsList, productList } from "./data";
 import Button from "./components/ui/Button";
 import type { IProduct } from "./interfaces";
 import { validateProduct } from "./validation";
 import ErrorMsg from "./components/ErrorMsg.tsx";
+import CircleColor from "./components/ui/CircleColor.tsx";
 
 function App() {
   const defaultProductObj = {
@@ -25,9 +26,11 @@ function App() {
     title: "",
     description: "",
     imageURL: "",
-    price:""
+    price: "",
   });
   const [product, setProduct] = useState<IProduct>(defaultProductObj);
+  const [tempColors, setTempColors] = useState<string[]>([]);
+  console.log(tempColors);
 
   function open() {
     setIsOpen(true);
@@ -37,6 +40,10 @@ function App() {
     setIsOpen(false);
   }
 
+  const handleCancel = () => {
+    setProduct(defaultProductObj);
+    close();
+  };
   function HandleInputChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
     setProduct((prevProduct) => ({
@@ -44,8 +51,9 @@ function App() {
       [name]: value,
     }));
     setErrors({
-      ...errors,[name]:""
-    })
+      ...errors,
+      [name]: "",
+    });
   }
 
   const HandleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -60,12 +68,14 @@ function App() {
       price,
     });
 
-const hasErrors = Object.values(errors).some((value) => value !== "");
+    const hasErrors = Object.values(errors).some((value) => value !== "");
     if (hasErrors) {
       setErrors(errors);
       return;
     }
   };
+
+  /* -------------------- RENDER -------------------- */
 
   const renderProductCards = productList.map((product) => (
     <ProductCard key={product.id} product={product} />
@@ -101,10 +111,19 @@ const hasErrors = Object.values(errors).some((value) => value !== "");
     </div>
   ));
 
-  function handleCancel() {
-    setProduct(defaultProductObj);
-    close();
-  }
+  const renderColors = colors.map((color) => (
+    <CircleColor
+      key={color}
+      color={color}
+      onClick={() => {
+        if (tempColors.includes(color)) {
+          setTempColors((prev) => prev.filter((item) => item !== color));
+          return;
+        }
+        setTempColors((prev) => [...prev, color]);
+      }}
+    />
+  ));
 
   return (
     <>
@@ -122,6 +141,19 @@ const hasErrors = Object.values(errors).some((value) => value !== "");
         <Modal isOpen={isOpen} closeModal={close} title="ADD NEW PRODUCT">
           <form onSubmit={HandleSubmit} className="flex flex-col space-y-4">
             {renderFormInputs}
+            <div className="flex flex-wrap items-center space-x-2 ">
+              {tempColors.map((color) => (
+                <span
+                  key={color}
+                  className="text-white text-xs mr-1 mb-2 p-1 rounded-md"
+                  style={{ backgroundColor: color }}
+                >
+                  {color}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center space-x-2">{renderColors}</div>
+
             <div className="flex items-center space-x-4">
               <Button className="text-white bg-blue-900 p-2 rounded-md">
                 Submit

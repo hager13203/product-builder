@@ -3,12 +3,14 @@ export const validateProduct = (product: {
   description: string;
   imageURL: string;
   price: string;
+  colors: string[];
 }) => {
   const errors = {
     title: "",
     description: "",
     imageURL: "",
     price: "",
+    colors: "",
   };
 
   // ** TITLE Validation
@@ -30,8 +32,8 @@ export const validateProduct = (product: {
   }
 
   // ** IMAGE URL Validation
-  const urlRegex =
-    /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i;
+const urlRegex =
+  /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?$/i;
 
   if (!product.imageURL.trim() || !urlRegex.test(product.imageURL)) {
     errors.imageURL = "Please enter a valid image URL";
@@ -40,12 +42,14 @@ export const validateProduct = (product: {
   // ** PRICE Validation
   const priceNumber = Number(product.price);
 
-  if (
-    !product.price.trim() ||
-    isNaN(priceNumber) ||
-    priceNumber <= 0
-  ) {
+  if (!product.price.trim() || isNaN(priceNumber) || priceNumber <= 0) {
     errors.price = "Price must be a positive number";
+  }
+
+  // ** COLORS Validation
+
+  if (!product.colors || product.colors.length === 0) {
+    errors.colors = "Please choose at least one color";
   }
 
   return errors;
